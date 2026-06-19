@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>E-book PDF Uploader</title>
+</head>
+
+<body style="font-family: Arial; text-align:center; margin-top:50px;">
+
+  <h2>📚 Upload Your PDF</h2>
+
+  <input type="file" id="fileInput" accept=".pdf">
+  <br><br>
+
+  <button onclick="uploadFile()">Upload PDF</button>
+
+  <p id="status"></p>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL }
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+    // 🔥 Your Firebase config (YOU MUST REPLACE THIS with your own from Firebase)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "XXXX",
+      appId: "XXXX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    window.uploadFile = async function () {
+      const file = document.getElementById("fileInput").files[0];
+      const status = document.getElementById("status");
+
+      if (!file) {
+        status.innerText = "Please select a PDF file.";
+        return;
+      }
+
+      status.innerText = "Uploading... ⏳";
+
+      try {
+        const storageRef = ref(storage, "ebooks/" + file.name);
+
+        await uploadBytes(storageRef, file);
+
+        const url = await getDownloadURL(storageRef);
+
+        status.innerHTML = "Upload successful! 🎉<br>Link: <a href='" + url + "' target='_blank'>Open PDF</a>";
+
+      } catch (error) {
+        status.innerText = "Upload failed: " + error.message;
+      }
+    };
+  </script>
+
+</body>
+</html>
